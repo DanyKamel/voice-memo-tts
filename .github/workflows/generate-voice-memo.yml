@@ -1,0 +1,64 @@
+name: Generate Voice Memo
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-audio:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install edge-tts
+        run: pip install edge-tts
+
+      - name: Generate voice memo
+        run: |
+          python3 -c "
+          import asyncio, edge_tts, textwrap
+
+          TEXT = textwrap.dedent('''
+          Okay so this is a 56 minute conversation between Jack Hopkins and his content director Max. Here are the things that actually matter.
+
+          The whole video is built around one idea. You are the brand, not the niche. Jack went from fitness coach to testosterone content to networking to personal brand coaching and made money in every single vertical, because people were following him, not a topic.
+
+          The first big point is go on the journey publicly before you have arrived. Do not wait until you are successful to start posting. Jack posted himself being broke in Thailand with a deadline. That is what people followed. The journey is the content.
+
+          Second point. Volume over perfection, especially at the start. Jack did 180 YouTube videos in 180 days. The algorithm shows your new video to people who just watched you for about 4 days. After that, you are gone. So if you post once a week, you lose that window every single time. Volume is how you build an audience fast.
+
+          Third. Start with Instagram stories. Five to ten stories a day. One talking reel per day giving an opinion. That is it. Stories are deleted in 24 hours, so the pressure is low. It teaches you what you like posting about and gets you comfortable on camera.
+
+          Fourth. Character design before anything else. Sit down and write out who you want to be seen as online. What do you want people to feel when they land on your page? Everything, the YouTube, the Instagram, the homepage, should say that one thing instantly.
+
+          Fifth. Your brand has to stand for something and against something. You cannot stand for everything. There has to be a mission, a way you see the world, and an enemy. That is what makes people align with you and stick.
+
+          Sixth. The 25 percent content rule. Break your content into four buckets. 25 percent viral, 25 percent authenticity, 25 percent education, 25 percent lifestyle. You need all four running at the same time.
+
+          Seventh. YouTube plus Instagram is the power play. YouTube builds deep connection. It takes 7 hours of watch time for someone to feel ready to buy from you. Instagram is your daily touchpoint. People see you every day, they message you, that is where the sales start.
+
+          Eighth. You do not need fame, you need 100 super fans. A hundred people spending a thousand dollars with you across a year is a hundred grand. A niche status brand that people are loyal to will always outlast a viral entertainer account.
+
+          And the last thing. Just start today. Not next week. Today. Take your phone out, say your name, say what you are planning to do in the next 90 days, and post it. The people who win are the ones who start and never stop.
+
+          That is the whole video.
+          ''').strip()
+
+          async def main():
+              communicate = edge_tts.Communicate(TEXT, 'en-GB-RyanNeural')
+              await communicate.save('voice_memo.mp3')
+              print('Done!')
+
+          asyncio.run(main())
+          "
+
+      - name: Upload MP3
+        uses: actions/upload-artifact@v4
+        with:
+          name: voice-memo-jack-hopkins
+          path: voice_memo.mp3
+          retention-days: 7
