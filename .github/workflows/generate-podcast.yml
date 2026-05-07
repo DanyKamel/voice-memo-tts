@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     permissions:
-      contents: write  # needed to push docs/ and create releases
+      contents: write
 
     steps:
       - name: Checkout repo
@@ -48,5 +48,60 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
-          git diff --staged --quiet || git commit -m "Podcast batch: index ${{ github.event.inputs.start_index }}, size ${{ github.event.inputs.batch_size }}"
+          git diff --staged --quiet || git commit -m "Podcast batch ${{ github.event.inputs.start_index }}"
           git push
+
+      - name: Queue next batch (auto-chain)
+        env:
+          DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          START_INDEX: ${{ github.event.inputs.start_index }}
+          BATCH_SIZE: ${{ github.event.inputs.batch_size }}
+        run: |
+          python3 - <<'EOF'
+          import json, urllib.request, os
+          from pathlib import Path
+
+          manifest_path = Path("docs/manifest.json")
+          if not manifest_path.exists():
+              print("No manifest found — skipping auto-queue.")
+              exit(0)
+
+          manifest    = json.loads(manifest_path.read_text())
+          total       = manifest.get("total_videos", 0)
+          done        = len(manifest.get("episodes", []))
+          batch_size  = int(os.environ.get("BATCH_SIZE", "15"))
+          start_index = int(os.environ.get("START_INDEX", "0"))
+          next_index  = start_index + batch_size
+
+          print(f"Progress: {done} episodes done, {total} total videos.")
+
+          if total == 0 or next_index >= total:
+              print("All videos processed! Nothing left to queue.")
+              exit(0)
+
+          print(f"Queueing next batch: start_index={next_index}, batch_size={batch_size}")
+
+          token = os.environ["DISPATCH_TOKEN"]
+          repo  = os.environ["GITHUB_REPOSITORY"]
+          req   = urllib.request.Request(
+              f"https://api.github.com/repos/{repo}/actions/workflows/generate-podcast.yml/dispatches",
+              method="POST"
+          )
+          req.add_header("Authorization", f"token {token}")
+          req.add_header("Accept", "application/vnd.github+json")
+          req.add_header("Content-Type", "application/json")
+          body = json.dumps({
+              "ref": "main",
+              "inputs": {
+                  "start_index": str(next_index),
+                  "batch_size":  str(batch_size)
+              }
+          }).encode()
+
+          try:
+              with urllib.request.urlopen(req, body) as r:
+                  print(f"Next batch queued ✓ (start_index={next_index})")
+          except urllib.error.HTTPError as e:
+              print(f"Failed to queue next batch: {e.read().decode()}")
+          EOF
