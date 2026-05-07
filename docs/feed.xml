@@ -1,0 +1,11 @@
+<?xml version='1.0' encoding='utf-8'?>
+<rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
+  <channel>
+    <title>Jack Hopkins — Summaries by Danykamel</title>
+    <link>https://danykamel.github.io/voice-memo-tts</link>
+    <description>AI audio summaries of Jack Hopkins YouTube videos.</description>
+    <language>en</language>
+    <itunes:author>Danykamel</itunes:author>
+    <itunes:category text="Education" />
+  </channel>
+</rss>
