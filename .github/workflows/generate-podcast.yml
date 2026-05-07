@@ -1,0 +1,55 @@
+name: Jack Hopkins Podcast Generator
+
+on:
+  workflow_dispatch:
+    inputs:
+      start_index:
+        description: 'Start from video index (0 = most recent)'
+        required: false
+        default: '0'
+      batch_size:
+        description: 'Videos to process per run (max ~20 before timeout risk)'
+        required: false
+        default: '15'
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install yt-dlp edge-tts anthropic
+
+      - name: Run podcast generator
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          BATCH_SIZE: ${{ github.event.inputs.batch_size }}
+          START_INDEX: ${{ github.event.inputs.start_index }}
+          PAGES_URL: https://danykamel.github.io/voice-memo-tts
+        run: python3 scripts/process_channel.py
+
+      - name: Commit docs (RSS feed + audio files)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/
+          git diff --staged --quiet || git commit -m "Add podcast batch: index ${{ github.event.inputs.start_index }}"
+          git push
+
+      - name: Upload MP3s as artifact (backup)
+        uses: actions/upload-artifact@v4
+        with:
+          name: podcast-batch-${{ github.event.inputs.start_index }}
+          path: docs/audio/*.mp3
+          retention-days: 90
