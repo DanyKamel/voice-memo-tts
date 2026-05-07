@@ -23,22 +23,38 @@ ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 PAGES_URL = os.environ.get("PAGES_URL", "https://danykamel.github.io/voice-memo-tts")
 
 
+MIN_DURATION_SECS = 180  # ignore anything under 3 minutes (filters out Shorts)
+
+
 def get_video_list():
-    print("Fetching video list from channel...")
+    print("Fetching video list from channel (long-form only, no Shorts)...")
     result = subprocess.run(
-        ["yt-dlp", "--flat-playlist", "--print", "%(id)s\t%(title)s\t%(upload_date)s",
+        ["yt-dlp", "--flat-playlist",
+         "--print", "%(id)s\t%(title)s\t%(upload_date)s\t%(duration)s",
          "--no-warnings", CHANNEL_URL],
         capture_output=True, text=True, timeout=180
     )
     videos = []
+    skipped = 0
     for line in result.stdout.strip().split("\n"):
         parts = line.split("\t")
-        if len(parts) >= 2:
-            vid_id = parts[0].strip()
-            title = parts[1].strip()
-            date = parts[2].strip() if len(parts) > 2 else "20240101"
-            if vid_id:
-                videos.append({"id": vid_id, "title": title, "date": date})
+        if len(parts) < 2:
+            continue
+        vid_id = parts[0].strip()
+        title = parts[1].strip()
+        date = parts[2].strip() if len(parts) > 2 else "20240101"
+        duration_str = parts[3].strip() if len(parts) > 3 else "0"
+        if not vid_id:
+            continue
+        try:
+            duration = int(float(duration_str))
+        except (ValueError, TypeError):
+            duration = 0
+        if duration > 0 and duration < MIN_DURATION_SECS:
+            skipped += 1
+            continue  # skip Shorts and very short videos
+        videos.append({"id": vid_id, "title": title, "date": date})
+    print(f"  {len(videos)} long-form videos found, {skipped} Shorts skipped.")
     return videos
 
 
