@@ -8,7 +8,7 @@ on:
         required: false
         default: '0'
       batch_size:
-        description: 'Videos to process per run (max ~20 before timeout risk)'
+        description: 'Videos to process per run'
         required: false
         default: '15'
 
@@ -16,6 +16,8 @@ jobs:
   generate:
     runs-on: ubuntu-latest
     timeout-minutes: 300
+    permissions:
+      contents: write  # needed to push docs/ and create releases
 
     steps:
       - name: Checkout repo
@@ -34,22 +36,17 @@ jobs:
       - name: Run podcast generator
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
           BATCH_SIZE: ${{ github.event.inputs.batch_size }}
           START_INDEX: ${{ github.event.inputs.start_index }}
           PAGES_URL: https://danykamel.github.io/voice-memo-tts
         run: python3 scripts/process_channel.py
 
-      - name: Commit docs (RSS feed + audio files)
+      - name: Commit updated RSS feed + index
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add docs/
-          git diff --staged --quiet || git commit -m "Add podcast batch: index ${{ github.event.inputs.start_index }}"
+          git diff --staged --quiet || git commit -m "Podcast batch: index ${{ github.event.inputs.start_index }}, size ${{ github.event.inputs.batch_size }}"
           git push
-
-      - name: Upload MP3s as artifact (backup)
-        uses: actions/upload-artifact@v4
-        with:
-          name: podcast-batch-${{ github.event.inputs.start_index }}
-          path: docs/audio/*.mp3
-          retention-days: 90
