@@ -117,11 +117,17 @@ def get_transcript(video_id):
         entries = YouTubeTranscriptApi.get_transcript(
             video_id, languages=["en", "en-US", "en-GB", "en-AU"]
         )
-        return " ".join(e["text"] for e in entries).strip()
-    except (NoTranscriptFound, TranscriptsDisabled):
+        text = " ".join(e["text"] for e in entries).strip()
+        print(f"  Transcript: {len(text.split())} words")
+        return text
+    except NoTranscriptFound as e:
+        print(f"  No transcript found: {e}")
+        return None
+    except TranscriptsDisabled as e:
+        print(f"  Transcripts disabled: {e}")
         return None
     except Exception as e:
-        print(f"  Transcript error: {e}")
+        print(f"  Transcript error ({type(e).__name__}): {e}")
         return None
 
 
