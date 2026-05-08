@@ -112,16 +112,27 @@ def get_video_list():
 
 
 def get_transcript(video_id):
+    import time, random
     from youtube_transcript_api import YouTubeTranscriptApi
-    try:
-        api    = YouTubeTranscriptApi()
-        transcript = api.fetch(video_id, languages=["en", "en-US", "en-GB", "en-AU"])
-        text   = " ".join(s.text for s in transcript).strip()
-        print(f"  Transcript: {len(text.split())} words")
-        return text
-    except Exception as e:
-        print(f"  Transcript error ({type(e).__name__}): {e}")
-        return None
+    ytt = YouTubeTranscriptApi()
+    for attempt in range(3):
+        try:
+            transcript = ytt.fetch(video_id, languages=["en", "en-US", "en-GB", "en-AU"])
+            text = " ".join(s.text for s in transcript).strip()
+            print(f"  Transcript: {len(text.split())} words")
+            time.sleep(random.uniform(2.0, 4.5))  # polite delay between requests
+            return text
+        except Exception as e:
+            err = type(e).__name__
+            if "IpBlocked" in err or "RequestBlocked" in err:
+                wait = 60 * (attempt + 1)
+                print(f"  IP blocked — waiting {wait}s before retry {attempt+1}/3...")
+                time.sleep(wait)
+            else:
+                print(f"  Transcript error ({err}): {str(e)[:120]}")
+                return None
+    print("  Gave up after 3 retries — skipping.")
+    return None
 
 
 # ── Summarisation ───────────────────────────────────────────────────────────
