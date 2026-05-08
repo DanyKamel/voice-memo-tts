@@ -112,20 +112,13 @@ def get_video_list():
 
 
 def get_transcript(video_id):
-    from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled
+    from youtube_transcript_api import YouTubeTranscriptApi
     try:
-        entries = YouTubeTranscriptApi.get_transcript(
-            video_id, languages=["en", "en-US", "en-GB", "en-AU"]
-        )
-        text = " ".join(e["text"] for e in entries).strip()
+        api    = YouTubeTranscriptApi()
+        transcript = api.fetch(video_id, languages=["en", "en-US", "en-GB", "en-AU"])
+        text   = " ".join(s.text for s in transcript).strip()
         print(f"  Transcript: {len(text.split())} words")
         return text
-    except NoTranscriptFound as e:
-        print(f"  No transcript found: {e}")
-        return None
-    except TranscriptsDisabled as e:
-        print(f"  Transcripts disabled: {e}")
-        return None
     except Exception as e:
         print(f"  Transcript error ({type(e).__name__}): {e}")
         return None
