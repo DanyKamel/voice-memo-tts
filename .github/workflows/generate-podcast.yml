@@ -31,7 +31,7 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: pip install yt-dlp edge-tts anthropic
+        run: pip install yt-dlp edge-tts anthropic youtube-transcript-api
 
       - name: Run podcast generator
         env:

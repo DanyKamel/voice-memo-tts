@@ -112,30 +112,17 @@ def get_video_list():
 
 
 def get_transcript(video_id):
-    tmp = f"/tmp/yt_{video_id}"
-    subprocess.run(
-        ["yt-dlp", "--write-auto-subs", "--sub-lang", "en",
-         "--sub-format", "vtt", "--skip-download", "--output", tmp,
-         f"https://www.youtube.com/watch?v={video_id}"],
-        capture_output=True, text=True, timeout=90
-    )
-    vtt_files = list(Path("/tmp").glob(f"yt_{video_id}*.vtt"))
-    if not vtt_files:
+    from youtube_transcript_api import YouTubeTranscriptApi, NoTranscriptFound, TranscriptsDisabled
+    try:
+        entries = YouTubeTranscriptApi.get_transcript(
+            video_id, languages=["en", "en-US", "en-GB", "en-AU"]
+        )
+        return " ".join(e["text"] for e in entries).strip()
+    except (NoTranscriptFound, TranscriptsDisabled):
         return None
-    vtt  = vtt_files[0].read_text(encoding="utf-8", errors="ignore")
-    prev, lines = None, []
-    for line in vtt.split("\n"):
-        line = line.strip()
-        if (not line or line.startswith("WEBVTT") or "-->" in line
-                or re.match(r"^\d+$", line) or re.match(r"^\d{2}:\d{2}", line)):
-            continue
-        clean = re.sub(r"<[^>]+>", "", line).strip()
-        if clean and clean != prev:
-            lines.append(clean)
-            prev = clean
-    for f in vtt_files:
-        f.unlink(missing_ok=True)
-    return " ".join(lines)
+    except Exception as e:
+        print(f"  Transcript error: {e}")
+        return None
 
 
 # ── Summarisation ───────────────────────────────────────────────────────────
