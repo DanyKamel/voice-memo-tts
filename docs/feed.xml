@@ -1,4 +1,4 @@
-<?xml version='1.0' encoding='utf-8'?>
+<?xml version='1.0' encoding='UTF-8'?>
 <rss xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd" version="2.0">
   <channel>
     <title>Jack Hopkins — Summaries by Danykamel</title>
@@ -7,5 +7,29 @@
     <language>en</language>
     <itunes:author>Danykamel</itunes:author>
     <itunes:category text="Education" />
+    <item>
+      <title>10 uncomfortable questions to ask yourself.</title>
+      <description>Summary: 10 uncomfortable questions to ask yourself.</description>
+      <enclosure url="https://github.com/DanyKamel/voice-memo-tts/releases/download/episodes/0003_10_uncomfortable_questions_to_ask_yourself.mp3" type="audio/mpeg" length="0" />
+      <guid>IZKw4UA00OE</guid>
+      <pubDate />
+      <itunes:duration>3:00</itunes:duration>
+    </item>
+    <item>
+      <title>how to speak charismatic &amp; masculine.</title>
+      <description>Summary: how to speak charismatic &amp; masculine.</description>
+      <enclosure url="https://github.com/DanyKamel/voice-memo-tts/releases/download/episodes/0002_how_to_speak_charismatic__masculine.mp3" type="audio/mpeg" length="0" />
+      <guid>2xpa8wWwcR8</guid>
+      <pubDate />
+      <itunes:duration>3:00</itunes:duration>
+    </item>
+    <item>
+      <title>don't dress like an NPC (style guide)</title>
+      <description>Summary: don't dress like an NPC (style guide)</description>
+      <enclosure url="https://github.com/DanyKamel/voice-memo-tts/releases/download/episodes/0001_dont_dress_like_an_NPC_style_guide.mp3" type="audio/mpeg" length="0" />
+      <guid>4p_1UHuS-uw</guid>
+      <pubDate />
+      <itunes:duration>3:00</itunes:duration>
+    </item>
   </channel>
 </rss>

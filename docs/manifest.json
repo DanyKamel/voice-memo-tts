@@ -1,5 +1,27 @@
 {
-  "episodes": [],
-  "total_videos": 374,
-  "last_updated": "2026-05-08T07:35:10.202303+00:00"
+  "episodes": [
+    {
+      "id": "4p_1UHuS-uw",
+      "title": "don't dress like an NPC (style guide)",
+      "file": "0001_dont_dress_like_an_NPC_style_guide.mp3",
+      "mp3_url": "https://github.com/DanyKamel/voice-memo-tts/releases/download/episodes/0001_dont_dress_like_an_NPC_style_guide.mp3",
+      "date": ""
+    },
+    {
+      "id": "2xpa8wWwcR8",
+      "title": "how to speak charismatic & masculine.",
+      "file": "0002_how_to_speak_charismatic__masculine.mp3",
+      "mp3_url": "https://github.com/DanyKamel/voice-memo-tts/releases/download/episodes/0002_how_to_speak_charismatic__masculine.mp3",
+      "date": ""
+    },
+    {
+      "id": "IZKw4UA00OE",
+      "title": "10 uncomfortable questions to ask yourself.",
+      "file": "0003_10_uncomfortable_questions_to_ask_yourself.mp3",
+      "mp3_url": "https://github.com/DanyKamel/voice-memo-tts/releases/download/episodes/0003_10_uncomfortable_questions_to_ask_yourself.mp3",
+      "date": ""
+    }
+  ],
+  "total_videos": 379,
+  "last_updated": "2026-05-08T07:39:45.814205+00:00"
 }
